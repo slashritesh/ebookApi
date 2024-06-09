@@ -3,7 +3,7 @@ declare namespace NodeJS {
       PORT?: string;
       NODE_ENV?: 'development' | 'production' | 'test';
       JWT_SECRET? : string
-      MONOGO_URL? : string
+      MONGO_URL? : string
     }
   }
   

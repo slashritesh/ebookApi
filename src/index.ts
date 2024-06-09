@@ -1,19 +1,41 @@
-import express from 'express';
+import express, { NextFunction } from 'express';
 import * as dotenv from 'dotenv';
-import notfoundMiddleware from './middleware/notfoundMiddleware';
+import { connectDb } from './db/connetdb';
+import authroutes from './routes/auth.route'
+import morgan from 'morgan'
+import { Response,Request } from 'express';
+import { StatusCodes } from 'http-status-codes';
+import errorMiddleware from './middleware/errorMiddleware';
+
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(morgan('dev'));
 
+//routes 
 
-// not found middleware
-app.use(notfoundMiddleware);
+app.use('/api/auth',authroutes);
+
+app.use("*",(req : Request,res : Response)=>{
+    res.status(StatusCodes.NOT_FOUND).json({
+        message : "route not found"
+    })
+})
+
+app.use(errorMiddleware);
 
 
 
 const port = process.env.PORT || 5000;
 
-app.listen(port,()=>{
-    console.log(`server is running on port : ${port}`);
-})
+const start = async ()=>{try {
+    await connectDb();
+    app.listen(port,()=>{
+        console.log(`server is running on port : ${port}`);
+    })
+} catch (error) {
+    console.log(error);
+}}
+
+start();
