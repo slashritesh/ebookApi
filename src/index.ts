@@ -6,16 +6,23 @@ import morgan from 'morgan'
 import { Response,Request } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import errorMiddleware from './middleware/errorMiddleware';
+import cookieParser from 'cookie-parser';
+import ebookRoutes from './routes/ebook.routes'
+
 
 
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({extended:true}))
 app.use(morgan('dev'));
+app.use(cookieParser())
+
 
 //routes 
 
 app.use('/api/auth',authroutes);
+app.use('/api',ebookRoutes);
 
 app.use("*",(req : Request,res : Response)=>{
     res.status(StatusCodes.NOT_FOUND).json({
