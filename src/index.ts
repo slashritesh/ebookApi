@@ -1,5 +1,6 @@
-import express, { NextFunction } from 'express';
 import * as dotenv from 'dotenv';
+dotenv.config();
+import express, { NextFunction } from 'express';
 import { connectDb } from './db/connetdb';
 import authroutes from './routes/auth.route'
 import morgan from 'morgan'
@@ -11,18 +12,18 @@ import ebookRoutes from './routes/ebook.routes'
 
 
 
-dotenv.config();
 const app = express();
+app.use(express.urlencoded({extended:true }))
 app.use(express.json());
-app.use(express.urlencoded({extended:true}))
 app.use(morgan('dev'));
+app.use(express.static("public"))
 app.use(cookieParser())
 
 
 //routes 
 
 app.use('/api/auth',authroutes);
-app.use('/api',ebookRoutes);
+app.use('/api/ebook',ebookRoutes);
 
 app.use("*",(req : Request,res : Response)=>{
     res.status(StatusCodes.NOT_FOUND).json({
@@ -31,6 +32,7 @@ app.use("*",(req : Request,res : Response)=>{
 })
 
 app.use(errorMiddleware);
+
 
 
 

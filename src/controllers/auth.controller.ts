@@ -1,9 +1,9 @@
 import { Request, Response } from "express-serve-static-core"
-import { user } from "../dtos/user.dtos"
 import { BadRequestError, UnauthenticationError } from "../errors/customErrors"
 import { User } from "../models/user.model"
 import { StatusCodes } from "http-status-codes"
 import { NextFunction } from "express"
+import { uploadOnCloudinary } from "../utils/cloudinary"
 
 const generateTokens = async (id : string) =>{
 
@@ -23,9 +23,11 @@ const generateTokens = async (id : string) =>{
 }
 
 
-export const register = async (req : Request<{},{},user>,res : Response,next : NextFunction)=> {
-    try {
-        const {email,password} = req.body
+export const register = async (req : Request<{},{}>,res : Response,next : NextFunction)=> {
+    
+    const {email,password} = req.body
+    console.log(req.file);
+     
 
     if(!email && !password){
         throw new BadRequestError('credentials required');
@@ -36,9 +38,25 @@ export const register = async (req : Request<{},{},user>,res : Response,next : N
     if(existinguser){
         throw new UnauthenticationError('existing user, please login');
     }
-    
-    const user = await User.create({email,password})
 
+    const localPathOfAvatar = req.file?.path
+    console.log(localPathOfAvatar);
+    
+
+    if(!localPathOfAvatar) new BadRequestError("avatar image is required !") 
+    
+    
+    const uploadedavatar = await uploadOnCloudinary(localPathOfAvatar as string) 
+
+    
+
+    if(!uploadedavatar) new BadRequestError("avatar image is required !")
+    
+    console.log(uploadedavatar);
+        
+    const user = await User.create({email,password,avatar : uploadedavatar?.url})
+
+    
     const createduser = await User.findById(user.id).select("-password -refreshToken")
 
     if(!createduser){
@@ -50,16 +68,17 @@ export const register = async (req : Request<{},{},user>,res : Response,next : N
         sucess : true
     })
 
-    } catch (error) {
-        next(error)
-    }
-    
     
 }
 
-export const login = async (req : Request<{},{},user>,res : Response,next : NextFunction) => {
+
+
+
+export const login = async (req : Request<{},{}>,res : Response,next : NextFunction) => {
     try {
         const {email,password} = req.body
+
+        if(!email && !password) throw new BadRequestError("Creadential must required")
 
         const existinguser = await User.findOne({email})
 

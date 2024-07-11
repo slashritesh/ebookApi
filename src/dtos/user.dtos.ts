@@ -2,7 +2,7 @@
 
 import { Document } from "mongoose"
 
-export interface user extends Document{
+export interface userDoc extends Document{
     id ?: string
     email : string
     refeshToken : string

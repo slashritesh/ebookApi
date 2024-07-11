@@ -1,18 +1,18 @@
 import mongoose, { Schema } from "mongoose";
-import { user } from "../dtos/user.dtos";
+import {  userDoc } from "../dtos/user.dtos";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 
 
-const UserSchema  = new mongoose.Schema<user>(
+const UserSchema  = new mongoose.Schema<userDoc>(
     {
         email : {
             type : String,
             unique : true,
             required : true
         },
-        password : {
+        password : { 
             type : String,
             required : true
         },
@@ -68,6 +68,7 @@ UserSchema.methods.generateRefreshToken = async function (){
         expiresIn : process.env.REFRESH_TOKEN_EXPIRY
     });
 
+    this.refeshToken = token
     return token
 }
 
