@@ -3,7 +3,7 @@ import { BadRequestError, UnauthenticationError } from "../errors/customErrors"
 import { User } from "../models/user.model"
 import { StatusCodes } from "http-status-codes"
 import { NextFunction } from "express"
-import { uploadOnCloudinary } from "../utils/cloudinary"
+import { Folders, uploadOnCloudinary } from "../utils/cloudinary"
 
 const generateTokens = async (id : string) =>{
 
@@ -46,7 +46,7 @@ export const register = async (req : Request<{},{}>,res : Response,next : NextFu
     if(!localPathOfAvatar) new BadRequestError("avatar image is required !") 
     
     
-    const uploadedavatar = await uploadOnCloudinary(localPathOfAvatar as string) 
+    const uploadedavatar = await uploadOnCloudinary(localPathOfAvatar!,Folders.avatar) 
 
     
 

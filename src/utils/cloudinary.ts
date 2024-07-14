@@ -1,4 +1,4 @@
-
+import fs from "fs"
 import { v2 as cloudinary } from "cloudinary";
 
 
@@ -18,11 +18,16 @@ const options = {
 cloudinary.config(options);
 
 
+export const Folders : {pdfs : string,avatar : string} = {
+    pdfs :"Pdfs",
+    avatar : "Avatar"
+}
 
 
 
 
-export const uploadOnCloudinary = async (localPath : string)=>{
+
+export const uploadOnCloudinary = async (localPath : string, folder : string)=>{
     console.log(options);
     console.log("values : ",process.env.CLOUDINARY_API_SECRET , process.env.CLOUDINARY_API_KEY);
     
@@ -31,19 +36,22 @@ export const uploadOnCloudinary = async (localPath : string)=>{
 
         // upload file on cloudinary
         const response = await cloudinary.uploader.upload(localPath,{
+            folder : folder,
             resource_type : "auto",
         }) 
 
-        console.log("upload file sucessfully",response);
+        // console.log("upload file sucessfully",response);
         return response
 
     } catch (error) {
-        // fs.unlinkSync(localPath) // remove temp file on server
+        fs.unlinkSync(localPath) // remove temp file on server
         console.log(error);
         
         return null
     }
 }
+
+
 
 
 

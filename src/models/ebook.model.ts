@@ -16,15 +16,33 @@ interface ebookDoc {
 
 
 const ebookSchema = new mongoose.Schema<ebookDoc>({
-    publishedby : mongoose.SchemaTypes.ObjectId,
-    author : String,
-    book_name : String,
-    pages : String, // derived value from the pdf 
-    file : String,
+    publishedby :{
+        type : mongoose.Schema.Types.ObjectId,
+        required : true
+    },
+    author : {
+        type : String,
+        required : true
+    },
+    book_name : {
+        type : String,
+        required : true
+    },
+    pages : {
+        type : String,
+        required : true
+    }, // derived value from the pdf 
+    file : {
+        type : String,
+        required : true
+    },
     tags : [
         {
-            name : String,
-        }
+            name : {
+                type : String,
+                required : true
+            },
+        },
     ],
     
 },{timestamps : true})

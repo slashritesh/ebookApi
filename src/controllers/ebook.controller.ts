@@ -1,51 +1,65 @@
-import { Request,Response } from "express"
+import {  NextFunction, Request,Response } from "express"
 import { AuthenticatedRequest } from "../middleware/authMiddleware"
 import { Ebook } from "../models/ebook.model"
 import { StatusCodes } from "http-status-codes"
-import { BadRequestError } from "../errors/customErrors"
-import { uploadOnCloudinary } from "../utils/cloudinary"
+import { BadRequestError, notFoundError } from "../errors/customErrors"
+import { Folders, uploadOnCloudinary } from "../utils/cloudinary"
 
 export const createEbook = async (req : AuthenticatedRequest,res : Response)=>{
-    const {auther , book_name , pages, tags} = req.body
-    
-
-
-    
+    const {author , book_name , pages} = req.body
+    const pdfLocalPath = req.file?.path
 
     const publishedby = req.user?.id
 
-    // upload file on cloudinary
-    const url = await uploadOnCloudinary("./")
+    const pdfuploaded = await uploadOnCloudinary(pdfLocalPath!,Folders.pdfs) 
     
-
-    const newbook = {auther,book_name,pages,file : url,publishedby,tags}
+    const newbook = { author, book_name , pages, publishedby, file : pdfuploaded?.url }
 
     const createdEbook = await Ebook.create(newbook)
 
-    res.status(StatusCodes.CREATED).json({message : createEbook})
+    res.status(StatusCodes.CREATED).json({message : createdEbook})
 }
-
 
 export const getALlEbooks = async (req : Request,res : Response)=>{
-
-    const books = await Ebook.find()
+    const books = await Ebook.find().populate('publishedby')
     res.status(StatusCodes.OK).json({data : books})
-
 }
 
 
-export const getSingleEbook = (req : Request,res : Response)=>{
-    res.json({message : "single book details"})
+export const getSingleEbook = async (req : Request,res : Response,next : NextFunction)=>{
+    try {
+        const {id } = req.params
+        console.log(`Looking for ebook with id: ${id}`);
+        const singleBook = await Ebook.findById(id)
+    
+        if (!singleBook) {
+            throw new notFoundError(`not found the book with this id : ${id} `)
+        }  
+        res.status(StatusCodes.OK).json({data : singleBook})
 
+    } catch (error) {
+        next(error)
+    }
+   
 }
 
 
 export const updateEbookDetails = (req : Request,res : Response)=>{
-    res.json({message : "update book details"})
-
+    
 }
 
-export const deleteEbook = (req : Request,res : Response)=>{
-    res.json({message : "book deleted sucesfully"})
+export const deleteEbook = async (req : Request,res : Response,next : NextFunction)=>{
+    try {
+        const {id } = req.params
+        const deletedbook = await Ebook.findOneAndDelete({_id : id})
 
+        if (!deletedbook) {
+            throw new notFoundError(`not found the book with this id : ${id} `)
+        }  
+
+        res.status(StatusCodes.OK).json({message : `book deleted sucessfully ${deletedbook?.id}`})
+
+    } catch (error) {
+        next(error)
+    }
 }

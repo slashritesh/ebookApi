@@ -6,7 +6,7 @@ const errorMiddleware = (err : Error,req : Request,res : Response,next : NextFun
     const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
     const message = err.message || 'Something went wrong,try Later'
     
-    res.status(statusCode).json({message,statusCode})
+    return res.status(statusCode).json({message,statusCode})
 }
 
 export default errorMiddleware
